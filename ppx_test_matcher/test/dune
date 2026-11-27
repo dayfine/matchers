@@ -1,5 +1,6 @@
 (test
  (name test_ppx_test_matcher)
- (libraries ounit2 matchers weinstein_trading.portfolio_risk)
+ (package ppx_test_matcher)
+ (libraries ounit2 matchers)
  (preprocess
   (pps ppx_test_matcher)))

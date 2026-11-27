@@ -1,3 +1,4 @@
 (test
  (name status_test)
+ (package status)
  (libraries ounit2 status))

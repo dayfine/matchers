@@ -1,10 +1,26 @@
 open OUnit2
 open Matchers
 
+(* Stands in for a type owned by another module, such as a library under test. *)
+module Summary = struct
+  type t = {
+    total_value : float;
+    cash : float;
+    cash_pct : float;
+    long_exposure : float;
+    long_exposure_pct : float;
+    short_exposure : float;
+    short_exposure_pct : float;
+    position_count : int;
+    sector_counts : (string * int) list;
+    sector_exposures : (string * float) list;
+  }
+end
+
 (* Re-declare the type to get exhaustive matcher generation.
-   If the production type adds/removes a field, this declaration
+   If the original type adds/removes a field, this declaration
    fails to compile — that's the exhaustiveness guarantee. *)
-type snapshot = Portfolio_risk.portfolio_snapshot = {
+type snapshot = Summary.t = {
   total_value : float;
   cash : float;
   cash_pct : float;
@@ -21,7 +37,7 @@ type snapshot = Portfolio_risk.portfolio_snapshot = {
 (* A simple record defined locally for basic testing. *)
 type point = { x : float; y : float } [@@deriving test_matcher]
 
-let _make_snapshot () : Portfolio_risk.portfolio_snapshot =
+let _make_snapshot () : Summary.t =
   {
     total_value = 100_000.0;
     cash = 50_000.0;

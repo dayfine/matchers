@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: "5.2"
+
+      - run: opam install . --deps-only --with-test
+
+      - run: opam exec -- dune build
+
+      - run: opam exec -- dune runtest
+
+      - name: Check formatting
+        run: |
+          opam install ocamlformat.$(awk -F' *= *' '$1 == "version" {print $2}' .ocamlformat)
+          opam exec -- dune build @fmt
