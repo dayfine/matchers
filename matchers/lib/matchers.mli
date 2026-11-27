@@ -1,8 +1,7 @@
 (** Testing utilities with a fluent matcher API.
 
     This module provides composable matchers for writing expressive test
-    assertions. Matchers work with OUnit2 test framework and Status.status_or
-    types. *)
+    assertions. Matchers work with the OUnit2 test framework. *)
 
 (** {1 Core Matcher Types} *)
 
@@ -147,9 +146,13 @@ val contains_substring : ?msg:string -> string -> string matcher
 
 (** {1 Result Matchers}
 
-    Matchers for [Result.t] and [Status.status_or] types *)
+    Matchers for [Result.t], generic over the error type. On a failure they
+    report only that the result was [Ok] or [Error], since they cannot print an
+    arbitrary error. For [Status.status_or], the [status_matchers] library
+    provides versions of [is_ok], [is_ok_and_holds] and [is_error] that print
+    the status, plus [is_error_with] for checking a status code and message. *)
 
-val is_ok : 'a Status.status_or matcher
+val is_ok : ('a, 'e) Result.t matcher
 (** [is_ok] creates a matcher that asserts a Result is Ok. Does not check the Ok
     value - use [is_ok_and_holds] if you need to assert on the value.
 
@@ -158,7 +161,7 @@ val is_ok : 'a Status.status_or matcher
     assert_that (validate_input valid_data) is_ok
     ]} *)
 
-val is_ok_and_holds : 'a matcher -> 'a Status.status_or matcher
+val is_ok_and_holds : 'a matcher -> ('a, 'e) Result.t matcher
 (** [is_ok_and_holds matcher] creates a matcher that asserts a Result is Ok and
     applies the inner matcher to the unwrapped value.
 
@@ -170,30 +173,22 @@ val is_ok_and_holds : 'a matcher -> 'a Status.status_or matcher
     assert_that result (is_ok_and_holds (float_equal 150.25))
     ]} *)
 
-val is_error : 'a Status.status_or matcher
+val is_error : ('a, 'e) Result.t matcher
 (** [is_error] creates a matcher that asserts a Result is Error. Does not check
-    the error details - use [is_error_with] if you need to check the status
-    code.
+    the error value - use [is_error_and_holds] for that.
 
     Example:
     {[
     assert_that (validate_input invalid_data) is_error
     ]} *)
 
-val is_error_with : ?msg:string -> Status.code -> 'a Status.status_or matcher
-(** [is_error_with ?msg code] creates a matcher that asserts a Result is Error
-    with the specified status code. Optionally takes a substring to check
-    against the error message content.
+val is_error_and_holds : 'e matcher -> ('a, 'e) Result.t matcher
+(** [is_error_and_holds matcher] creates a matcher that asserts a Result is
+    Error and applies the inner matcher to the error value.
 
     Example:
     {[
-    assert_that (get_order manager "nonexistent") (is_error_with NotFound)
-    ]}
-    {[
-    assert_that (create_order invalid_params) (is_error_with Invalid_argument)
-    ]}
-    {[
-    assert_that result (is_error_with Invalid_argument ~msg:"must be positive")
+    assert_that (parse "x") (is_error_and_holds (contains_substring "bad"))
     ]} *)
 
 (** {1 Option Matchers}

@@ -251,6 +251,41 @@ let test_contains_substring_empty_haystack_fails _ =
 let test_contains_substring_equal_strings_passes _ =
   assert_that "exact" (contains_substring "exact")
 
+(* ------------------------------------------------------------------ *)
+(* Result matchers (generic over the error type)                        *)
+(* ------------------------------------------------------------------ *)
+
+let _ok : (int, string) Result.t = Ok 3
+let _err : (int, string) Result.t = Error "bad input"
+
+let test_is_ok_generic _ =
+  assert_that _ok is_ok;
+  assert_fails_naming ~substring:"Expected Ok but got Error" (fun () ->
+      assert_that _err is_ok)
+
+let test_is_ok_and_holds_generic _ =
+  assert_that _ok (is_ok_and_holds (equal_to 3));
+  assert_fails (fun () -> assert_that _ok (is_ok_and_holds (equal_to 4)));
+  assert_fails_naming ~substring:"Expected Ok but got Error" (fun () ->
+      assert_that _err (is_ok_and_holds (equal_to 3)))
+
+let test_is_error_generic _ =
+  assert_that _err is_error;
+  assert_fails_naming ~substring:"Expected Error but got Ok" (fun () ->
+      assert_that _ok is_error)
+
+let test_is_error_and_holds_generic _ =
+  assert_that _err (is_error_and_holds (contains_substring "bad"));
+  assert_fails (fun () ->
+      assert_that _err (is_error_and_holds (contains_substring "missing")));
+  assert_fails_naming ~substring:"Expected Error but got Ok" (fun () ->
+      assert_that _ok (is_error_and_holds (contains_substring "bad")))
+
+let test_result_matchers_any_error_type _ =
+  let r : (string, int) Result.t = Error 42 in
+  assert_that r (is_error_and_holds (equal_to 42));
+  assert_that (Ok "x" : (string, int) Result.t) (is_ok_and_holds (equal_to "x"))
+
 let suite =
   "matchers"
   >::: [
@@ -312,6 +347,12 @@ let suite =
          >:: test_contains_substring_empty_haystack_fails;
          "contains_substring_equal_strings_passes"
          >:: test_contains_substring_equal_strings_passes;
+         "is_ok_generic" >:: test_is_ok_generic;
+         "is_ok_and_holds_generic" >:: test_is_ok_and_holds_generic;
+         "is_error_generic" >:: test_is_error_generic;
+         "is_error_and_holds_generic" >:: test_is_error_and_holds_generic;
+         "result_matchers_any_error_type"
+         >:: test_result_matchers_any_error_type;
        ]
 
 let () = run_test_tt_main suite

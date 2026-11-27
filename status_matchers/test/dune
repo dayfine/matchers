@@ -1,0 +1,4 @@
+(test
+ (name test_status_matchers)
+ (package status_matchers)
+ (libraries matchers ounit2 status status_matchers))

@@ -79,39 +79,22 @@ let contains_substring ?msg substring actual =
 let is_ok result =
   match result with
   | Ok _ -> () (* Expected *)
-  | Error err -> assert_failure ("Expected Ok but got Error: " ^ Status.show err)
+  | Error _ -> assert_failure "Expected Ok but got Error"
 
 let is_ok_and_holds matcher result =
   match result with
   | Ok value -> matcher value
-  | Error err -> assert_failure ("Expected Ok but got Error: " ^ Status.show err)
+  | Error _ -> assert_failure "Expected Ok but got Error"
 
 let is_error result =
   match result with
   | Ok _ -> assert_failure "Expected Error but got Ok"
   | Error _ -> () (* Expected *)
 
-let _check_error_code ~expected_code (status : Status.t) =
-  if not (Status.equal_code status.code expected_code) then
-    assert_failure
-      (Printf.sprintf "Expected error code %s but got %s"
-         (Status.show_code expected_code)
-         (Status.show_code status.code))
-
-let _check_error_message ~substring (status : Status.t) =
-  let msg_str = Status.show status in
-  if not (String.is_substring msg_str ~substring) then
-    assert_failure
-      (Printf.sprintf "Expected error message to contain '%s' but got: %s"
-         substring msg_str)
-
-let is_error_with ?msg expected_code result =
+let is_error_and_holds matcher result =
   match result with
   | Ok _ -> assert_failure "Expected Error but got Ok"
-  | Error status ->
-      _check_error_code ~expected_code status;
-      Option.iter msg ~f:(fun substring ->
-          _check_error_message ~substring status)
+  | Error err -> matcher err
 
 (* ========================================================================== *)
 (* Option Matchers                                                           *)

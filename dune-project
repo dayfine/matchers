@@ -29,14 +29,26 @@
 
 (package
  (name matchers)
- (synopsis "Testing utilities for Result types with OUnit2")
+ (synopsis "Composable test matchers for OUnit2")
  (description
-  "Provides a fluent matcher API for testing Result and Option types in OCaml with OUnit2. Includes matchers like is_ok_and_holds, is_error, is_some_and, and combinators for cleaner test assertions.")
+  "A fluent matcher API for OUnit2 tests: equality, float and ordering matchers, field and combinator matchers, generic Result and Option matchers, and list and map matchers.")
+ (depends
+  (ocaml
+   (>= 5.2.0))
+  core
+  ounit2))
+
+(package
+ (name status_matchers)
+ (synopsis "OUnit2 matchers for Status.status_or results")
+ (description
+  "Matchers for Status.status_or results: is_ok, is_ok_and_holds and is_error that print the status on failure, and is_error_with for checking a status code and message. Builds on the matchers and status packages.")
  (depends
   (ocaml
    (>= 5.2.0))
   core
   ounit2
+  matchers
   status))
 
 (package
